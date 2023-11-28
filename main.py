@@ -63,7 +63,7 @@ def get_torrent_info_hdkylin(table_row, passkey, args):
     
     description = table_row.select("td.embedded" )[1].text
     
-    comments = "是否热门:{}\t是否免费:{}\t免费时间:{}\t存活时间:{}\t大小:{}\t上传人数:{}\t下载人数:{}\t完成人数:{}"..format(
+    comments = "是否热门:{}\t是否免费:{}\t免费时间:{}\t存活时间:{}\t大小:{}\t上传人数:{}\t下载人数:{}\t完成人数:{}".format(
         hot_flag, free_flag, free_time, survival_time, size, uploading_people, downloading_people, finished_people)
 
     rss_item = PyRSS2Gen.RSSItem(title=name, link=download_href, description=description, comments=comments)
