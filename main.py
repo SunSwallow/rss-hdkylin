@@ -7,6 +7,14 @@ import re
 import datetime
 from flask import Flask, render_template, request, send_from_directory, Response
 
+def get_hot_word_flag(torrent):
+    if args.hotword == '':
+        return False
+    hotwords = args.hotword.split(",")
+    for hotword in hotwords:
+        if hotword in str(torrent):
+            return True
+    return False
 def time_to_minutes(time_str):
 
     # Define a dictionary to hold the conversion values for each unit
@@ -29,9 +37,6 @@ def parse_cookies(cookies_str):
 def get_torrent_info_hdkylin(table_row, passkey, args):
     free_flag = bool(table_row.find('img', class_='pro_free'))
 
-    if args.only_free and not free_flag:
-        return None
-    
     if free_flag:
         free_time = table_row.find('span', title=True).text
     else:
@@ -39,14 +44,8 @@ def get_torrent_info_hdkylin(table_row, passkey, args):
 
     hot_flag = bool(table_row.find('font', class_='hot'))
 
-    if args.only_hot and not hot_flag:
-        return None
-
     survival_time = table_row.select("td.rowfollow.nowrap span")[0].text
     # print("转换前：{}，转换后：{}".format(survival_time, time_to_minutes(survival_time)))
-
-    if args.survival_time_limit > 0 and time_to_minutes(survival_time) > args.survival_time_limit:
-        return None
 
     name = table_row.select("td.embedded  a b" )[0].text
 
@@ -60,17 +59,21 @@ def get_torrent_info_hdkylin(table_row, passkey, args):
 
     downloading_people = td_rowfollow[-3].text
 
-    if args.downloading_people_limit > 0 and int(downloading_people) < args.downloading_people_limit:
-        return None
-
     finished_people = td_rowfollow[-2].text
-
     
-
     description = "是否热门:{}\t是否免费:{}\t免费时间:{}\t存活时间:{}\t大小:{}\t上传人数:{}\t下载人数:{}\t完成人数:{}\n\n{}".format(
         hot_flag, free_flag, free_time, survival_time, size, uploading_people, downloading_people, finished_people, table_row.select("td.embedded" )[1].text)
 
     rss_item = PyRSS2Gen.RSSItem(title=name, link=download_href, description=description)
+    
+    if get_hot_word_flag(table_row):
+        return rss_item
+    
+    if (args.only_free and not free_flag) or (args.only_hot and not hot_flag) or (args.survival_time_limit > 0 and time_to_minutes(survival_time) > args.survival_time_limit) or (args.downloading_people_limit > 0 and int(downloading_people) < args.downloading_people_limit):
+        return None
+
+    if args.hot_or_free and (not hot_flag and not free_flag):
+        return None 
 
     return rss_item
 
@@ -105,9 +108,11 @@ parser.add_argument('--cookies',type=str)
 parser.add_argument("--passkey", type=str)
 parser.add_argument("--only_free", type=int, default=1)
 parser.add_argument("--only_hot", type=int, default=0)
+parser.add_argument("--hot_or_free", type=int, default=0)
 parser.add_argument("--survival_time_limit", default=0, help="默认单位为分", type=int)
 parser.add_argument("--port", default=80, type=int)
 parser.add_argument("--downloading_people_limit", default=0, help="默认单位为人", type=int)
+parser.add_argument("--hotword", type=str, default="")
 args = parser.parse_args()
 print(args)
 session = requests.Session()
