@@ -69,7 +69,7 @@ def get_torrent_info_hdkylin(table_row, passkey, args):
     if get_hot_word_flag(table_row):
         return rss_item
     
-    if (args.only_free and not free_flag) or (args.only_hot and not hot_flag) or (args.survival_time_limit > 0 and time_to_minutes(survival_time) > args.survival_time_limit) or (args.downloading_people_limit > 0 and int(downloading_people) < args.downloading_people_limit):
+    if (args.only_free and not free_flag) or (args.only_hot and not hot_flag) or (args.survival_time_limit > 0 and time_to_minutes(survival_time) > args.survival_time_limit) or (args.downloading_people_limit > 0 and int(downloading_people) >= args.downloading_people_limit):
         return None
 
     if args.hot_or_free and (not hot_flag and not free_flag):
