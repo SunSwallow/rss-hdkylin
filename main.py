@@ -61,10 +61,12 @@ def get_torrent_info_hdkylin(table_row, passkey, args):
 
     finished_people = td_rowfollow[-2].text
     
-    description = "是否热门:{}\t是否免费:{}\t免费时间:{}\t存活时间:{}\t大小:{}\t上传人数:{}\t下载人数:{}\t完成人数:{}\n\n{}".format(
-        hot_flag, free_flag, free_time, survival_time, size, uploading_people, downloading_people, finished_people, table_row.select("td.embedded" )[1].text)
+    description = table_row.select("td.embedded" )[1].text
+    
+    comments = "是否热门:{}\t是否免费:{}\t免费时间:{}\t存活时间:{}\t大小:{}\t上传人数:{}\t下载人数:{}\t完成人数:{}"..format(
+        hot_flag, free_flag, free_time, survival_time, size, uploading_people, downloading_people, finished_people)
 
-    rss_item = PyRSS2Gen.RSSItem(title=name, link=download_href, description=description)
+    rss_item = PyRSS2Gen.RSSItem(title=name, link=download_href, description=description, comments=comments)
     
     if get_hot_word_flag(table_row):
         return rss_item
