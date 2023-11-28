@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 import PyRSS2Gen
 import re
 import datetime
-from flask import Flask, render_template, request, send_from_directory, Response
+from flask import Flask, Response
 
 def get_hot_word_flag(torrent):
     if args.hotword == '':
